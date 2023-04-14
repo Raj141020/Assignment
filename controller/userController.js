@@ -49,3 +49,65 @@ exports.createUser= async function(req,res){ // Checking body is empty or not
     }
     
 }
+
+//>-------------------------------------- GET USER DETAIL -------------------------------------<//
+
+exports.getUserData = async (req, res) => {
+    try {
+        const userId = req.params.userId
+
+        const user = await userModel.findById(userId)
+
+        if (!user) {
+            return res.status(404).send({ status: false, message: "No user found with this Id" })
+        }
+        return res.status(200).send({ status: true, data: user })
+
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+}
+
+/* ----------------------------------------- EDIT USER DATA --------------------------------------------------- */
+
+exports.updateProfile = async function (req, res) {
+
+    try {
+  
+      const data = req.body
+      const userId = req.params.userId
+  
+      let {first_name,
+        last_name,
+        legal_name,
+        aadhar_number,
+        pan_number,
+        gstin_number,
+        address,
+        state_code,
+        state_name,
+        google_analytics_id,
+        pin_code} = data //Destructuring
+  
+        if(Object.keys(data).length==0){
+            return res.status(400).send({status:false,message:"Body is empty"})
+        }
+
+        if(Object.keys(data)=='aadhar_number'||Object.keys(data)=='pan_number'||Object.keys(data)=='gstin_number'){
+            return res.status(400).send({status:false,message:"These fields cannot be edited"})
+        }
+
+        
+      const updateUser = await userModel.findOneAndUpdate(
+        { _id: userId },
+        {$set:data},
+        { new: true }
+      )
+  
+      return res.status(200).send({status: true,message: "user profile successfully updated",data: updateUser})
+    } 
+    catch (error) {
+      res.status(500).send({status:false, message: error.message })
+    }
+  }
